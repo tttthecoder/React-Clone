@@ -1,5 +1,7 @@
 // To inittialize the project, enter 2 commands, first is npm run dev(to watch compile tsx into jsx), second is npx serve(to start the server up )
 // ---Library---
+const asyncRenderCache = [];
+var asyncCurrentPointer = 0;
 const render = (el, container) => {
   if (
     typeof el === "string" ||
@@ -13,7 +15,22 @@ const render = (el, container) => {
   }
   if (typeof el.tag === "function") {
     const props = { ...el.props, children: el.children };
-    render(el.tag(props), container);
+    const tree = el.tag(props);
+    if (tree instanceof Promise) {
+      if (!asyncRenderCache[asyncCurrentPointer]) {
+        render(el.props.loading, container);
+        const currentPointer = asyncCurrentPointer;
+        tree.then((asyncTree) => {
+          asyncRenderCache[currentPointer] = asyncTree;
+          reRender();
+        });
+      } else {
+        render(asyncRenderCache[asyncCurrentPointer], container);
+      }
+      asyncCurrentPointer++;
+    } else {
+      render(tree, container);
+    }
     return;
   }
   let domEl = document.createElement(el.tag);
@@ -52,12 +69,23 @@ const useState = (initialState) => {
 };
 const reRender = () => {
   myAppStateCursor = 0;
-  console.log("reRender-ing :)");
+  asyncCurrentPointer = 0;
+  // console.log("reRender-ing :)");
   const rootNode = document.getElementById("myapp");
   rootNode.innerHTML = "";
   render(<App />, rootNode);
 };
 // ---Application---
+const MyAsyncComponent = async (props) => {
+  const response = await fetch("http://localhost:8080/", { mode: "cors" });
+  const data = await response.json();
+  return (
+    <div>
+      <p>Client Name: {data.name}</p>
+      <p>Client Email: {data.email}</p>
+    </div>
+  );
+};
 const Counter = () => {
   const [counter, setCounter] = useState(0);
   return (
@@ -84,11 +112,18 @@ const App = () => {
           setName(e.target.value);
         }}
       />
+      <p>Below is an async component</p>
+      <MyAsyncComponent loading={<h1>Loading client</h1>}></MyAsyncComponent>
+      <p>Async component ends</p>
       <h2> Counter value: {count}</h2>
       <button onclick={() => setCount(count + 1)}>+1</button>
       <button onclick={() => setCount(count - 1)}>-1</button>
       <p> below is another component, which is Counter</p>
       <Counter />
+      <p>Below is another async component</p>
+      <MyAsyncComponent
+        loading={<h1>Loading another client hahaha</h1>}
+      ></MyAsyncComponent>
     </div>
   );
 };
