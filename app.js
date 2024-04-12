@@ -7,6 +7,11 @@ const render = (el, container) => {
         container.appendChild(document.createTextNode(el === undefined ? "undefined" : el.toString()));
         return;
     }
+    if (typeof el.tag === "function") {
+        const props = Object.assign(Object.assign({}, el.props), { children: el.children });
+        render(el.tag(props), container);
+        return;
+    }
     let domEl = document.createElement(el.tag);
     let elProps = el.props ? Object.keys(el.props) : null;
     if (elProps && elProps.length > 0) {
@@ -21,9 +26,6 @@ const render = (el, container) => {
 };
 const React = {
     createElement: (tag, props, ...children) => {
-        if (typeof tag === "function") {
-            return tag(props, ...children);
-        }
         const el = {
             tag,
             props,
@@ -57,7 +59,7 @@ const Counter = () => {
     return (React.createElement("button", { onclick: () => {
             setCounter(counter + 1);
         } },
-        "This is a button and this has its own state. counter is: ",
+        "This is a button and it has its own state. counter is now: ",
         counter));
 };
 var number = 0;
@@ -69,10 +71,12 @@ const App = () => {
             "Hello, my name is ",
             name,
             ". I am the library author"),
-        React.createElement("p", null, "I am a pargraph."),
-        React.createElement("input", { type: "text", onchange: (e) => setName(e.target.value) }),
+        React.createElement("p", null, "I am a pargraph"),
+        React.createElement("input", { type: "text", onchange: (e) => {
+                setName(e.target.value);
+            } }),
         React.createElement("h2", null,
-            "count state value is now : ",
+            " Counter value: ",
             count),
         React.createElement("button", { onclick: () => setCount(count + 1) }, "+1"),
         React.createElement("button", { onclick: () => setCount(count - 1) }, "-1"),

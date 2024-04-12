@@ -11,6 +11,11 @@ const render = (el, container) => {
     );
     return;
   }
+  if (typeof el.tag === "function") {
+    const props = { ...el.props, children: el.children };
+    render(el.tag(props), container);
+    return;
+  }
   let domEl = document.createElement(el.tag);
   let elProps = el.props ? Object.keys(el.props) : null;
   if (elProps && elProps.length > 0) {
@@ -25,9 +30,6 @@ const render = (el, container) => {
 };
 const React = {
   createElement: (tag, props, ...children) => {
-    if (typeof tag === "function") {
-      return tag(props, ...children);
-    }
     const el = {
       tag,
       props,
@@ -64,7 +66,7 @@ const Counter = () => {
         setCounter(counter + 1);
       }}
     >
-      This is a button and this has its own state. counter is: {counter}
+      This is a button and it has its own state. counter is now: {counter}
     </button>
   );
 };
@@ -75,9 +77,14 @@ const App = () => {
   return (
     <div draggable>
       <h2>Hello, my name is {name}. I am the library author</h2>
-      <p>I am a pargraph.</p>
-      <input type="text" onchange={(e) => setName(e.target.value)} />
-      <h2>count state value is now : {count}</h2>
+      <p>I am a pargraph</p>
+      <input
+        type="text"
+        onchange={(e) => {
+          setName(e.target.value);
+        }}
+      />
+      <h2> Counter value: {count}</h2>
       <button onclick={() => setCount(count + 1)}>+1</button>
       <button onclick={() => setCount(count - 1)}>-1</button>
       <p> below is another component, which is Counter</p>
