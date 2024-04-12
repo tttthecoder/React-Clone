@@ -20,11 +20,14 @@ const render = (el, container) => {
       if (!asyncRenderCache[asyncCurrentPointer]) {
         render(el.props.loading, container);
         const currentPointer = asyncCurrentPointer;
+        asyncRenderCache[currentPointer] = tree;
         tree.then((asyncTree) => {
           asyncRenderCache[currentPointer] = asyncTree;
           reRender();
         });
-      } else {
+      } else if (asyncRenderCache[asyncCurrentPointer] instanceof Promise) {
+        render(el.props.loading, container);
+      } else if (!(asyncRenderCache[asyncCurrentPointer] instanceof Promise)) {
         render(asyncRenderCache[asyncCurrentPointer], container);
       }
       asyncCurrentPointer++;
