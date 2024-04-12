@@ -1,3 +1,4 @@
+// To inittialize the project, enter 2 commands, first is npm run dev(to watch compile tsx into jsx), second is npx serve(to start the server up )
 // ---Library---
 const render = (el, container) => {
   if (
