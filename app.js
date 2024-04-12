@@ -57,7 +57,7 @@ const Counter = () => {
     return (React.createElement("button", { onclick: () => {
             setCounter(counter + 1);
         } },
-        "counter is: ",
+        "This is a button and this has its own state. counter is: ",
         counter));
 };
 var number = 0;
@@ -69,14 +69,14 @@ const App = () => {
             "Hello, my name is ",
             name,
             ". I am the library author"),
-        React.createElement("p", null, "I am a pargraph"),
+        React.createElement("p", null, "I am a pargraph."),
         React.createElement("input", { type: "text", onchange: (e) => setName(e.target.value) }),
         React.createElement("h2", null,
-            " Counter value: ",
+            "count state value is now : ",
             count),
         React.createElement("button", { onclick: () => setCount(count + 1) }, "+1"),
         React.createElement("button", { onclick: () => setCount(count - 1) }, "-1"),
-        React.createElement("p", null, " below is my counter"),
+        React.createElement("p", null, " below is another component, which is Counter"),
         React.createElement(Counter, null)));
 };
 render(React.createElement(App, null), document.getElementById("myapp"));

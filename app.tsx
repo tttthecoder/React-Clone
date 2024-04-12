@@ -64,7 +64,7 @@ const Counter = () => {
         setCounter(counter + 1);
       }}
     >
-      counter is: {counter}
+      This is a button and this has its own state. counter is: {counter}
     </button>
   );
 };
@@ -75,13 +75,12 @@ const App = () => {
   return (
     <div draggable>
       <h2>Hello, my name is {name}. I am the library author</h2>
-      <p>I am a pargraph</p>
+      <p>I am a pargraph.</p>
       <input type="text" onchange={(e) => setName(e.target.value)} />
-      <h2> Counter value: {count}</h2>
-
+      <h2>count state value is now : {count}</h2>
       <button onclick={() => setCount(count + 1)}>+1</button>
       <button onclick={() => setCount(count - 1)}>-1</button>
-      <p> below is my counter</p>
+      <p> below is another component, which is Counter</p>
       <Counter />
     </div>
   );
