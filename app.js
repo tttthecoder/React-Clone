@@ -12,6 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const asyncRenderCache = [];
 var asyncCurrentPointer = 0;
 const render = (el, container) => {
+    var _a;
     if (typeof el === "string" ||
         typeof el === "number" ||
         typeof el === "undefined") {
@@ -20,16 +21,16 @@ const render = (el, container) => {
     }
     if (typeof el.tag === "function") {
         const props = Object.assign(Object.assign({}, el.props), { children: el.children });
-        const tree = el.tag(props);
-        if (tree instanceof Promise) {
+        if ((_a = el.props) === null || _a === void 0 ? void 0 : _a.loading) {
             if (!asyncRenderCache[asyncCurrentPointer]) {
-                render(el.props.loading, container);
+                const asyncTree = el.tag(props);
                 const currentPointer = asyncCurrentPointer;
-                asyncRenderCache[currentPointer] = tree;
-                tree.then((asyncTree) => {
-                    asyncRenderCache[currentPointer] = asyncTree;
+                asyncRenderCache[currentPointer] = asyncTree;
+                asyncTree.then((resultTree) => {
+                    asyncRenderCache[currentPointer] = resultTree;
                     reRender();
                 });
+                render(el.props.loading, container);
             }
             else if (asyncRenderCache[asyncCurrentPointer] instanceof Promise) {
                 render(el.props.loading, container);
@@ -40,6 +41,7 @@ const render = (el, container) => {
             asyncCurrentPointer++;
         }
         else {
+            const tree = el.tag(props);
             render(tree, container);
         }
         return;
@@ -81,10 +83,11 @@ const useState = (initialState) => {
 const reRender = () => {
     myAppStateCursor = 0;
     asyncCurrentPointer = 0;
-    // console.log("reRender-ing :)");
     const rootNode = document.getElementById("myapp");
-    rootNode.innerHTML = "";
+    rootNode.innerHTML = null;
     render(React.createElement(App, null), rootNode);
+    myAppStateCursor = 0;
+    asyncCurrentPointer = 0;
 };
 // ---Application---
 const MyAsyncComponent = (props) => __awaiter(this, void 0, void 0, function* () {
@@ -121,15 +124,12 @@ const App = () => {
             } }),
         React.createElement("p", null, "Below is an async component"),
         React.createElement(MyAsyncComponent, { loading: React.createElement("h1", null, "Loading client") }),
-        React.createElement("p", null, "Async component ends"),
         React.createElement("h2", null,
             " Counter value: ",
             count),
         React.createElement("button", { onclick: () => setCount(count + 1) }, "+1"),
         React.createElement("button", { onclick: () => setCount(count - 1) }, "-1"),
         React.createElement("p", null, " below is another component, which is Counter"),
-        React.createElement(Counter, null),
-        React.createElement("p", null, "Below is another async component"),
-        React.createElement(MyAsyncComponent, { loading: React.createElement("h1", null, "Loading another client hahaha") })));
+        React.createElement(Counter, null)));
 };
 render(React.createElement(App, null), document.getElementById("myapp"));

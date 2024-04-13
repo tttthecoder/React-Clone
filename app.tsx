@@ -13,18 +13,19 @@ const render = (el, container) => {
     );
     return;
   }
+
   if (typeof el.tag === "function") {
     const props = { ...el.props, children: el.children };
-    const tree = el.tag(props);
-    if (tree instanceof Promise) {
+    if (el.props?.loading) {
       if (!asyncRenderCache[asyncCurrentPointer]) {
-        render(el.props.loading, container);
+        const asyncTree = el.tag(props);
         const currentPointer = asyncCurrentPointer;
-        asyncRenderCache[currentPointer] = tree;
-        tree.then((asyncTree) => {
-          asyncRenderCache[currentPointer] = asyncTree;
+        asyncRenderCache[currentPointer] = asyncTree;
+        asyncTree.then((resultTree) => {
+          asyncRenderCache[currentPointer] = resultTree;
           reRender();
         });
+        render(el.props.loading, container);
       } else if (asyncRenderCache[asyncCurrentPointer] instanceof Promise) {
         render(el.props.loading, container);
       } else if (!(asyncRenderCache[asyncCurrentPointer] instanceof Promise)) {
@@ -32,6 +33,7 @@ const render = (el, container) => {
       }
       asyncCurrentPointer++;
     } else {
+      const tree = el.tag(props);
       render(tree, container);
     }
     return;
@@ -73,10 +75,11 @@ const useState = (initialState) => {
 const reRender = () => {
   myAppStateCursor = 0;
   asyncCurrentPointer = 0;
-  // console.log("reRender-ing :)");
   const rootNode = document.getElementById("myapp");
-  rootNode.innerHTML = "";
+  rootNode.innerHTML = null;
   render(<App />, rootNode);
+  myAppStateCursor = 0;
+  asyncCurrentPointer = 0;
 };
 // ---Application---
 const MyAsyncComponent = async (props) => {
@@ -117,16 +120,11 @@ const App = () => {
       />
       <p>Below is an async component</p>
       <MyAsyncComponent loading={<h1>Loading client</h1>}></MyAsyncComponent>
-      <p>Async component ends</p>
       <h2> Counter value: {count}</h2>
       <button onclick={() => setCount(count + 1)}>+1</button>
       <button onclick={() => setCount(count - 1)}>-1</button>
       <p> below is another component, which is Counter</p>
       <Counter />
-      <p>Below is another async component</p>
-      <MyAsyncComponent
-        loading={<h1>Loading another client hahaha</h1>}
-      ></MyAsyncComponent>
     </div>
   );
 };
